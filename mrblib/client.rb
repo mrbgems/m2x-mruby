@@ -49,7 +49,7 @@ class M2X::Client
     path = url.path
     path << "?#{url.query}" if url.query
 
-    socket = ::TCPSocket.new(url.host, url.port || 80)
+    socket = new_socket(url.host, url.port || 80)
     socket.write(encoded_request(verb.to_s.upcase, path, body, headers))
 
     # TODO: support chunked responses
@@ -58,6 +58,10 @@ class M2X::Client
 
   def http_parser
     @http_parser ||= HTTP::Parser.new
+  end
+
+  def new_socket(host, port)
+    ::TCPSocket.new(host, port)
   end
 
   def default_headers
