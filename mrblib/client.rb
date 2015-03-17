@@ -3,7 +3,7 @@ module M2X; end
 class M2X::Client
   VERSION = "0.0.1"
 
-  DEFAULT_API_BASE    = "http://api-m2x.att.com" # TODO: support SSL (https)
+  DEFAULT_API_BASE    = "http://api-m2x.att.com"
   DEFAULT_API_VERSION = "v2"
 
   USER_AGENT = "M2X-MRuby/#{M2X::Client::VERSION} #{RUBY_ENGINE}/#{RUBY_VERSION}"
@@ -30,6 +30,7 @@ class M2X::Client
 
   def request(verb, path, qs=nil, params=nil, headers=nil)
     url = url_from(path)
+    raise "SSL is not supported" if url.schema == "https"
 
     url.query = encode_www_form(qs) unless qs.nil? || qs.empty?
 
