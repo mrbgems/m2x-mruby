@@ -35,7 +35,7 @@ class M2X::Client::Stream < M2X::Client::Resource
   #     ]
   #
   # https://m2x.att.com/developer/documentation/v2/device#Post-Data-Stream-Values
-  def post_values(value, timestamp=nil)
+  def post_values(values)
     params = { values: values }
     @client.post("#{path}/values", nil, params, "Content-Type" => "application/json")
   end
