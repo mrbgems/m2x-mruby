@@ -20,14 +20,53 @@ class MockSocketClass
     @expected_port = port
   end
 
-  def expect_request(*lines)
+  def expect_request_lines(*lines)
     @enabled = true
     @expected_written = lines.join("\r\n")
   end
 
-  def prepare_response(*lines)
+  def prepare_response_lines(*lines)
     @enabled = true
     @readable = lines.join("\r\n")
+  end
+
+  def expect_request(verb, path, opts={})
+    headers = {
+      "User-Agent" => M2X::Client::USER_AGENT,
+      "X-M2X-KEY"  => TEST_API_KEY,
+    }
+    if opts[:json]
+      body = JSON.generate(opts[:json])
+      headers["Content-Type"]   = "application/json"
+      headers["Content-Length"] = body.bytesize
+    else
+      body = ""
+    end
+
+    expect_request_lines(
+      "#{verb.to_s.upcase} #{path} HTTP/1.1",
+      *headers.map { |key,val| "#{key}: #{val}" },
+      "",
+      body
+    )
+  end
+
+  def prepare_response(status, opts={})
+    headers = {}
+    if opts[:json]
+      body = JSON.generate(opts[:json])
+      headers["Content-Type"]   = "application/json"
+      headers["Content-Length"] = body.bytesize
+    else
+      body = ""
+    end
+
+    prepare_response_lines(
+      "HTTP/1.1 #{status}",
+      *headers.map { |key,val| "#{key}: #{val}" },
+      "",
+      body
+    )
   end
 
   def verify!
@@ -43,6 +82,19 @@ class MockSocketClass
     @expected_host = nil
     @expected_port = nil
     @expected_written = nil
+  end
+
+  def mock!(request, response, &block)
+    result = nil
+    begin
+      MockSocket.expect_request(*request)
+      MockSocket.prepare_response(*response)
+      result = block.call
+      MockSocket.verify!
+    ensure
+      MockSocket.reset!
+    end
+    result
   end
 
   ##
@@ -102,14 +154,14 @@ assert 'Client#get' do
   subject = M2X::Client.new(TEST_API_KEY)
 
   MockSocket.expect_connect('api-m2x.att.com', 80)
-  MockSocket.expect_request(
+  MockSocket.expect_request_lines(
     "GET /v2/status HTTP/1.1",
     "User-Agent: #{M2X::Client::USER_AGENT}",
     "X-M2X-KEY: #{TEST_API_KEY}",
     "",
     "",
   )
-  MockSocket.prepare_response(
+  MockSocket.prepare_response_lines(
     "HTTP/1.1 200 OK",
     "Content-Type: application/json",
     "Date: Tue, 17 Mar 2015 18:00:00 GMT",
@@ -151,26 +203,12 @@ assert 'Client#create_device' do
   params = { name:'test device', visibility:'public', description:'foo' }
   result = params.merge(id:'a2852df27102179429b3a02641594044')
 
-  MockSocket.expect_request(
-    'POST /v2/devices HTTP/1.1',
-    "User-Agent: #{M2X::Client::USER_AGENT}",
-    "X-M2X-KEY: #{TEST_API_KEY}",
-    "Content-Type: application/json",
-    "Content-Length: #{JSON.generate(params).bytesize}",
-    '',
-    JSON.generate(params),
-  )
-  MockSocket.prepare_response(
-    'HTTP/1.1 201 Created',
-    'Content-Type: application/json',
-    "Content-Length: #{JSON.generate(result).bytesize}",
-    '',
-    JSON.generate(result),
-  )
-
-  device = subject.create_device(params)
-  MockSocket.verify!
-  MockSocket.reset!
+  device = MockSocket.mock!(
+    [:post, "/v2/devices", json:params],
+    ['201 Created', json:result]
+  ) {
+    subject.create_device(params)
+  }
 
   assert_true device.is_a?(M2X::Client::Device)
   assert_equal device.id,             result[:id]
@@ -189,24 +227,12 @@ assert 'Client::Device#stream' do
   result = { name: name, type: 'numeric', value: 32,
              unit: { label: 'celsius', symbol: 'C' } }
 
-  MockSocket.expect_request(
-    "GET /v2/devices/#{subject.id}/streams/#{name} HTTP/1.1",
-    "User-Agent: #{M2X::Client::USER_AGENT}",
-    "X-M2X-KEY: #{TEST_API_KEY}",
-    "",
-    "",
-  )
-  MockSocket.prepare_response(
-    "HTTP/1.1 200 OK",
-    "Content-Type: application/json",
-    "Content-Length: #{JSON.generate(result).bytesize}",
-    "",
-    JSON.generate(result),
-  )
-
-  stream = subject.stream(name)
-  MockSocket.verify!
-  MockSocket.reset!
+  stream = MockSocket.mock!(
+    [:get, "/v2/devices/#{subject.id}/streams/#{name}"],
+    ['200 OK', json:result]
+  ) {
+    subject.stream(name)
+  }
 
   assert_true stream.is_a?(M2X::Client::Stream)
   assert_equal stream.name,              result[:name]
@@ -226,26 +252,12 @@ assert 'Client::Device#update_location' do
              timestamp: "2014-09-10T19:15:00.756Z", elevation: 5 }
   result = { status:'accepted' }
 
-  MockSocket.expect_request(
-    "PUT /v2/devices/#{subject.id}/location HTTP/1.1",
-    "User-Agent: #{M2X::Client::USER_AGENT}",
-    "X-M2X-KEY: #{TEST_API_KEY}",
-    "Content-Type: application/json",
-    "Content-Length: #{JSON.generate(params).bytesize}",
-    "",
-    JSON.generate(params),
-  )
-  MockSocket.prepare_response(
-    "HTTP/1.1 202 Accepted",
-    "Content-Type: application/json",
-    "Content-Length: #{JSON.generate(result).bytesize}",
-    "",
-    JSON.generate(result),
-  )
-
-  res = subject.update_location(params)
-  MockSocket.verify!
-  MockSocket.reset!
+  res = MockSocket.mock!(
+    [:put, "/v2/devices/#{subject.id}/location", json:params],
+    ['202 Accepted', json:result]
+  ) {
+    subject.update_location(params)
+  }
 
   assert_true res.is_a?(M2X::Client::Response)
   assert_equal res.status,   202
@@ -261,24 +273,12 @@ assert 'Client::Device#update_stream' do
   name = 'test_stream'
   params = { unit: { label:"celsius", symbol:"C" }, type:"numeric" }
 
-  MockSocket.expect_request(
-    "PUT /v2/devices/#{subject.id}/streams/#{name} HTTP/1.1",
-    "User-Agent: #{M2X::Client::USER_AGENT}",
-    "X-M2X-KEY: #{TEST_API_KEY}",
-    "Content-Type: application/json",
-    "Content-Length: #{JSON.generate(params).bytesize}",
-    "",
-    JSON.generate(params),
-  )
-  MockSocket.prepare_response(
-    "HTTP/1.1 204 No Content",
-    "",
-    "",
-  )
-
-  res = subject.update_stream(name, params)
-  MockSocket.verify!
-  MockSocket.reset!
+  res = MockSocket.mock!(
+    [:put, "/v2/devices/#{subject.id}/streams/#{name}", json:params],
+    ['204 No Content']
+  ) {
+    subject.update_stream(name, params)
+  }
 
   assert_true res.is_a?(M2X::Client::Response)
   assert_equal res.status,   204
@@ -305,26 +305,12 @@ assert 'Client::Device#post_updates' do
   }}
   result = { status:'accepted' }
 
-  MockSocket.expect_request(
-    "POST /v2/devices/#{subject.id}/updates HTTP/1.1",
-    "User-Agent: #{M2X::Client::USER_AGENT}",
-    "X-M2X-KEY: #{TEST_API_KEY}",
-    "Content-Type: application/json",
-    "Content-Length: #{JSON.generate(params).bytesize}",
-    "",
-    JSON.generate(params),
-  )
-  MockSocket.prepare_response(
-    "HTTP/1.1 202 No Content",
-    "Content-Type: application/json",
-    "Content-Length: #{JSON.generate(result).bytesize}",
-    "",
-    JSON.generate(result),
-  )
-
-  res = subject.post_updates(params)
-  MockSocket.verify!
-  MockSocket.reset!
+  res = MockSocket.mock!(
+    [:post, "/v2/devices/#{subject.id}/updates", json:params],
+    ['202 Accepted', json:result]
+  ) {
+    subject.post_updates(params)
+  }
 
   assert_true res.is_a?(M2X::Client::Response)
   assert_equal res.status,   202
