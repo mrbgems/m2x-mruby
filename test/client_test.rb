@@ -139,21 +139,21 @@ TEST_API_KEY = '8fa2e8f6f42d664355f718a90e78d31d'
 ##
 # Test Cases
 
-assert 'Client.new' do
+assert 'M2X::Client.new' do
   subject = M2X::Client.new
   assert_equal subject.api_key,     nil
   assert_equal subject.api_base,    M2X::Client::DEFAULT_API_BASE
   assert_equal subject.api_version, M2X::Client::DEFAULT_API_VERSION
 end
 
-assert 'Client.new(api_key)' do
+assert 'M2X::Client.new(api_key)' do
   subject = M2X::Client.new(TEST_API_KEY)
   assert_equal subject.api_key,     TEST_API_KEY
   assert_equal subject.api_base,    M2X::Client::DEFAULT_API_BASE
   assert_equal subject.api_version, M2X::Client::DEFAULT_API_VERSION
 end
 
-assert 'Client#get' do
+assert 'M2X::Client#get' do
   subject = M2X::Client.new(TEST_API_KEY)
 
   MockSocket.expect_connect('api-m2x.att.com', 80)
@@ -201,7 +201,7 @@ assert 'Client#get' do
   }
 end
 
-assert 'Client#create_device' do
+assert 'M2X::Client#create_device' do
   subject = M2X::Client.new(TEST_API_KEY)
   params = { name:'test device', visibility:'public', description:'foo' }
   result = params.merge(id:'a2852df27102179429b3a02641594044')
@@ -220,7 +220,7 @@ assert 'Client#create_device' do
   assert_equal device['description'], result[:description]
 end
 
-assert 'Client#device' do
+assert 'M2X::Client#device' do
   subject = M2X::Client.new(TEST_API_KEY)
   result = { id:'a2852df27102179429b3a02641594044',
              name:'test device', visibility:'public', description:'foo' }
@@ -239,7 +239,7 @@ assert 'Client#device' do
   assert_equal device['description'], result[:description]
 end
 
-assert 'Client#distribution' do
+assert 'M2X::Client#distribution' do
   subject = M2X::Client.new(TEST_API_KEY)
   result = { id:'a2852df27102179429b3a02641594044',
              name:'test distribution', visibility:'public', description:'foo' }
@@ -258,7 +258,7 @@ assert 'Client#distribution' do
   assert_equal distribution['description'], result[:description]
 end
 
-assert 'Client::Device#stream' do
+assert 'M2X::Client::Device#stream' do
   client = M2X::Client.new(TEST_API_KEY)
   subject = M2X::Client::Device.new(client,
     "id"=>"a2852df27102179429b3a02641594044", "name"=>"test device")
@@ -282,7 +282,7 @@ assert 'Client::Device#stream' do
   assert_equal stream['unit']['symbol'], result[:unit][:symbol]
 end
 
-assert 'Client::Device#update_location' do
+assert 'M2X::Client::Device#update_location' do
   client = M2X::Client.new(TEST_API_KEY)
   subject = M2X::Client::Device.new(client,
     "id"=>"a2852df27102179429b3a02641594044", "name"=>"test device")
@@ -305,7 +305,7 @@ assert 'Client::Device#update_location' do
   assert_equal res.json,     JSON.parse(JSON.generate(result))
 end
 
-assert 'Client::Device#update_stream' do
+assert 'M2X::Client::Device#update_stream' do
   client = M2X::Client.new(TEST_API_KEY)
   subject = M2X::Client::Device.new(client,
     "id"=>"a2852df27102179429b3a02641594044", "name"=>"test device")
@@ -325,7 +325,7 @@ assert 'Client::Device#update_stream' do
   assert_equal res.success?, true
 end
 
-assert 'Client::Device#post_updates' do
+assert 'M2X::Client::Device#post_updates' do
   client = M2X::Client.new(TEST_API_KEY)
   subject = M2X::Client::Device.new(client,
     "id"=>"a2852df27102179429b3a02641594044", "name"=>"test device")
@@ -357,7 +357,7 @@ assert 'Client::Device#post_updates' do
   assert_equal res.json,     JSON.parse(JSON.generate(result))
 end
 
-assert 'Client::Distribution#create_device' do
+assert 'M2X::Client::Distribution#create_device' do
   client = M2X::Client.new(TEST_API_KEY)
   subject = M2X::Client::Distribution.new(client,
     "id"=>"fefd6d0f4bd8aa25479a8ea4760319a5")
@@ -380,7 +380,7 @@ assert 'Client::Distribution#create_device' do
   assert_equal device['description'], result[:description]
 end
 
-assert 'Client::Stream#update_value' do
+assert 'M2X::Client::Stream#update_value' do
   client = M2X::Client.new(TEST_API_KEY)
   device = M2X::Client::Device.new(client, "id"=>"a2852df27102179429b3a02641594044")
   subject = M2X::Client::Stream.new(client, device, "name"=>"temperature")
@@ -414,7 +414,7 @@ assert 'Client::Stream#update_value' do
   assert_equal res.json,     JSON.parse(JSON.generate(result))
 end
 
-assert 'Client::Stream#post_values' do
+assert 'M2X::Client::Stream#post_values' do
   client = M2X::Client.new(TEST_API_KEY)
   device = M2X::Client::Device.new(client, "id"=>"a2852df27102179429b3a02641594044")
   subject = M2X::Client::Stream.new(client, device, "name"=>"temperature")
