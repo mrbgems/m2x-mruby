@@ -1,5 +1,13 @@
 module M2X; end
 
+# Interface for connecting with the AT&T M2X API.
+#
+# Create a Client and use it to create or access Resource objects or
+# use the Client to directly access any M2X API endpoint using REST methods:
+#
+#     m2x = M2X::Client.new("<YOUR-API-KEY>")
+#     m2x.get("/some_path")
+#
 class M2X::Client
   VERSION = "0.0.1"
 
@@ -19,7 +27,15 @@ class M2X::Client
     @api_version = api_version || DEFAULT_API_VERSION
   end
 
-  # Define methods for accessing M2X REST API
+  # Creates a new device on M2X with the specified parameters.
+  #
+  # https://m2x.att.com/developer/documentation/v2/device#Create-Device
+  def create_device(params)
+    res = post("/devices", nil, params, "Content-Type" => "application/json")
+    Device.new(self, res.json) if res.success?
+  end
+
+  # Define REST methods for accessing the M2X API directly.
   [:get, :post, :put, :delete, :head, :options, :patch].each do |verb|
     define_method verb do |path, qs=nil, params=nil, headers=nil|
       request(verb, path, qs, params, headers)
@@ -40,12 +56,13 @@ class M2X::Client
       headers["Content-Type"] ||= "application/x-www-form-urlencoded"
 
       case headers["Content-Type"]
-      when "application/json" then ::JSON.dump(params)
+      when "application/json" then ::JSON.generate(params)
       when "application/x-www-form-urlencoded" then encode_www_form(params)
       else
         raise ArgumentError, "Unrecognized Content-Type `#{headers["Content-Type"]}`"
       end
     end
+    headers["Content-Length"] = body.bytesize if body
 
     path = url.path
     path << "?#{url.query}" if url.query
@@ -77,14 +94,9 @@ class M2X::Client
   end
 
   def encode_www_form(params)
-    case params
-    when Hash
-      params.map do |key, value|
-        "#{HTTP::URL.encode(key.to_s)}=#{HTTP::URL.encode(value.to_s)}"
-      end.join('&')
-    else
-      raise ArgumentError, "query must be a Hash"
-    end
+    params.map do |key, value|
+      "#{HTTP::URL.encode(key.to_s)}=#{HTTP::URL.encode(value.to_s)}"
+    end.join('&')
   end
 
   def encoded_request(method, request_uri, body, headers)
