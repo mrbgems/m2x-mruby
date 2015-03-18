@@ -15,7 +15,7 @@ Refer to the [Glossary of Terms](https://m2x.att.com/developer/documentation/glo
 
 ## Usage
 
-In order to communicate with the M2X API, you need an instance of [M2X::Client](lib/m2x/client.rb). You need to pass your API key in the constructor to access your data.
+In order to communicate with the M2X API, you need an instance of [M2X::Client](mrblib/m2x-client.rb). You need to pass your API key in the constructor to access your data.
 
 ```ruby
 m2x = M2X::Client.new("<YOUR-API-KEY>")
