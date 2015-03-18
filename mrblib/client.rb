@@ -35,6 +35,18 @@ class M2X::Client
     Device.new(self, res.json) if res.success?
   end
 
+  # Fetch the existing device that has the given id.
+  def device(id)
+    res = get("/devices/#{id}")
+    Device.new(self, res.json) if res.success?
+  end
+
+  # Fetch the existing distribution that has the given id.
+  def distribution(id)
+    res = get("/distributions/#{id}")
+    Distribution.new(self, res.json) if res.success?
+  end
+
   # Define REST methods for accessing the M2X API directly.
   [:get, :post, :put, :delete, :head, :options, :patch].each do |verb|
     define_method verb do |path, qs=nil, params=nil, headers=nil|
