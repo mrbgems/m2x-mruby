@@ -5,14 +5,9 @@ class M2X::Client; end
 #
 # https://m2x.att.com/developer/documentation/v2/distribution
 class M2X::Client::Distribution < M2X::Client::Resource
-  # The distribution's unique id.
-  def id
-    @id ||= @attributes["id"]
-  end
-
   # The API path of the distribution.
   def path
-    @path ||= "/distributions/#{HTTP::URL.encode(id)}"
+    @path ||= "/distributions/#{HTTP::URL.encode(@attributes["id"])}"
   end
 
   # Add a new device to an existing distribution

@@ -211,7 +211,6 @@ assert 'Client#create_device' do
   }
 
   assert_true device.is_a?(M2X::Client::Device)
-  assert_equal device.id,             result[:id]
   assert_equal device['id'],          result[:id]
   assert_equal device['name'],        result[:name]
   assert_equal device['visibility'],  result[:visibility]
@@ -228,14 +227,14 @@ assert 'Client::Device#stream' do
              unit: { label: 'celsius', symbol: 'C' } }
 
   stream = MockSocket.mock!(
-    [:get, "/v2/devices/#{subject.id}/streams/#{name}"],
+    [:get, "/v2/devices/#{subject['id']}/streams/#{name}"],
     ['200 OK', json:result]
   ) {
     subject.stream(name)
   }
 
   assert_true stream.is_a?(M2X::Client::Stream)
-  assert_equal stream.name,              result[:name]
+  assert_equal stream['name'],           result[:name]
   assert_equal stream['type'],           result[:type]
   assert_equal stream['value'],          result[:value]
   assert_equal stream['unit']['label'],  result[:unit][:label]
@@ -253,7 +252,7 @@ assert 'Client::Device#update_location' do
   result = { status:'accepted' }
 
   res = MockSocket.mock!(
-    [:put, "/v2/devices/#{subject.id}/location", json:params],
+    [:put, "/v2/devices/#{subject['id']}/location", json:params],
     ['202 Accepted', json:result]
   ) {
     subject.update_location(params)
@@ -274,7 +273,7 @@ assert 'Client::Device#update_stream' do
   params = { unit: { label:"celsius", symbol:"C" }, type:"numeric" }
 
   res = MockSocket.mock!(
-    [:put, "/v2/devices/#{subject.id}/streams/#{name}", json:params],
+    [:put, "/v2/devices/#{subject['id']}/streams/#{name}", json:params],
     ['204 No Content']
   ) {
     subject.update_stream(name, params)
@@ -288,8 +287,7 @@ end
 assert 'Client::Device#post_updates' do
   client = M2X::Client.new(TEST_API_KEY)
   subject = M2X::Client::Device.new(client,
-    "id"=>"a2852df27102179429b3a02641594044",
-    "name"=>"test device", "visibility"=>"public", "description"=>"foo")
+    "id"=>"a2852df27102179429b3a02641594044", "name"=>"test device")
 
   params = { values: {
     temperature: [
@@ -306,7 +304,7 @@ assert 'Client::Device#post_updates' do
   result = { status:'accepted' }
 
   res = MockSocket.mock!(
-    [:post, "/v2/devices/#{subject.id}/updates", json:params],
+    [:post, "/v2/devices/#{subject['id']}/updates", json:params],
     ['202 Accepted', json:result]
   ) {
     subject.post_updates(params)

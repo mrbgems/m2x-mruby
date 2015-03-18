@@ -11,16 +11,9 @@ class M2X::Client::Stream < M2X::Client::Resource
     @attributes = attributes
   end
 
-  # The name of the stream.
-  def name
-    @name ||= @attributes["name"]
-  end
-
   # The API path of the stream.
   def path
-    puts HTTP::URL.encode(name).inspect
-    puts @device.path.inspect
-    @path ||= "#{@device.path}/streams/#{HTTP::URL.encode(name)}"
+    @path ||= "#{@device.path}/streams/#{HTTP::URL.encode(@attributes["name"])}"
   end
 
   # Update the current value of the stream. The timestamp is optional.

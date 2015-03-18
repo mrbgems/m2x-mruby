@@ -6,14 +6,9 @@ class M2X::Client::Resource; end
 #
 # https://m2x.att.com/developer/documentation/v2/device
 class M2X::Client::Device < M2X::Client::Resource
-  # The device's unique id.
-  def id
-    @id ||= @attributes["id"]
-  end
-
   # The API path of the device.
   def path
-    @path ||= "/devices/#{HTTP::URL.encode(id)}"
+    @path ||= "/devices/#{HTTP::URL.encode(@attributes["id"])}"
   end
 
   # Create a Stream object to access the device's stream with the given name.
