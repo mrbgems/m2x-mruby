@@ -136,6 +136,9 @@ end
 # An invalid API key to use in tests.
 TEST_API_KEY = '8fa2e8f6f42d664355f718a90e78d31d'
 
+##
+# Test Cases
+
 assert 'Client.new' do
   subject = M2X::Client.new
   assert_equal subject.api_key,     nil
@@ -215,6 +218,44 @@ assert 'Client#create_device' do
   assert_equal device['name'],        result[:name]
   assert_equal device['visibility'],  result[:visibility]
   assert_equal device['description'], result[:description]
+end
+
+assert 'Client#device' do
+  subject = M2X::Client.new(TEST_API_KEY)
+  result = { id:'a2852df27102179429b3a02641594044',
+             name:'test device', visibility:'public', description:'foo' }
+
+  device = MockSocket.mock!(
+    [:get, "/v2/devices/#{result[:id]}"],
+    ['200 OK', json:result]
+  ) {
+    subject.device(result[:id])
+  }
+
+  assert_true device.is_a?(M2X::Client::Device)
+  assert_equal device['id'],          result[:id]
+  assert_equal device['name'],        result[:name]
+  assert_equal device['visibility'],  result[:visibility]
+  assert_equal device['description'], result[:description]
+end
+
+assert 'Client#distribution' do
+  subject = M2X::Client.new(TEST_API_KEY)
+  result = { id:'a2852df27102179429b3a02641594044',
+             name:'test distribution', visibility:'public', description:'foo' }
+
+  distribution = MockSocket.mock!(
+    [:get, "/v2/distributions/#{result[:id]}"],
+    ['200 OK', json:result]
+  ) {
+    subject.distribution(result[:id])
+  }
+
+  assert_true distribution.is_a?(M2X::Client::Distribution)
+  assert_equal distribution['id'],          result[:id]
+  assert_equal distribution['name'],        result[:name]
+  assert_equal distribution['visibility'],  result[:visibility]
+  assert_equal distribution['description'], result[:description]
 end
 
 assert 'Client::Device#stream' do
@@ -308,6 +349,88 @@ assert 'Client::Device#post_updates' do
     ['202 Accepted', json:result]
   ) {
     subject.post_updates(params)
+  }
+
+  assert_true res.is_a?(M2X::Client::Response)
+  assert_equal res.status,   202
+  assert_equal res.success?, true
+  assert_equal res.json,     JSON.parse(JSON.generate(result))
+end
+
+assert 'Client::Distribution#create_device' do
+  client = M2X::Client.new(TEST_API_KEY)
+  subject = M2X::Client::Distribution.new(client,
+    "id"=>"fefd6d0f4bd8aa25479a8ea4760319a5")
+  params = { serial:'ABC12345' }
+  result = params.merge(id:'a2852df27102179429b3a02641594044',
+    name:"test device", visibility:"public", description:"foo")
+
+  device = MockSocket.mock!(
+    [:post, "/v2/distributions/#{subject['id']}/devices", json:params],
+    ['201 Created', json:result]
+  ) {
+    device = subject.add_device(params[:serial])
+  }
+
+  assert_true device.is_a?(M2X::Client::Device)
+  assert_equal device['id'],          result[:id]
+  assert_equal device['serial'],      result[:serial]
+  assert_equal device['name'],        result[:name]
+  assert_equal device['visibility'],  result[:visibility]
+  assert_equal device['description'], result[:description]
+end
+
+assert 'Client::Stream#update_value' do
+  client = M2X::Client.new(TEST_API_KEY)
+  device = M2X::Client::Device.new(client, "id"=>"a2852df27102179429b3a02641594044")
+  subject = M2X::Client::Stream.new(client, device, "name"=>"temperature")
+
+  params = { value:100, timestamp:'2014-10-01T12:00:00Z' }
+  result = { status:'accepted' }
+
+  res = MockSocket.mock!(
+    [:put, "/v2/devices/#{device['id']}/streams/#{subject['name']}/value", json:params],
+    ['202 Accepted', json:result]
+  ) {
+    subject.update_value(params[:value], params[:timestamp])
+  }
+
+  assert_true res.is_a?(M2X::Client::Response)
+  assert_equal res.status,   202
+  assert_equal res.success?, true
+  assert_equal res.json,     JSON.parse(JSON.generate(result))
+
+  params.delete(:timestamp)
+  res = MockSocket.mock!(
+    [:put, "/v2/devices/#{device['id']}/streams/#{subject['name']}/value", json:params],
+    ['202 Accepted', json:result]
+  ) {
+    subject.update_value(params[:value]) # without timestamp
+  }
+
+  assert_true res.is_a?(M2X::Client::Response)
+  assert_equal res.status,   202
+  assert_equal res.success?, true
+  assert_equal res.json,     JSON.parse(JSON.generate(result))
+end
+
+assert 'Client::Stream#post_values' do
+  client = M2X::Client.new(TEST_API_KEY)
+  device = M2X::Client::Device.new(client, "id"=>"a2852df27102179429b3a02641594044")
+  subject = M2X::Client::Stream.new(client, device, "name"=>"temperature")
+
+  params = { values:[
+    { value:32, timestamp:'2014-09-09T19:15:00.624Z' },
+    { value:30, timestamp:'2014-09-09T20:15:00.522Z' },
+    { value:15, timestamp:'2014-09-09T21:15:00.522Z' },
+  ]}
+  result = { status:'accepted' }
+
+  res = MockSocket.mock!(
+    [:post, "/v2/devices/#{device['id']}/streams/#{subject['name']}/values", json:params],
+    ['202 Accepted', json:result]
+  ) {
+    subject.post_values(params[:values])
   }
 
   assert_true res.is_a?(M2X::Client::Response)
