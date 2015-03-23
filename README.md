@@ -28,9 +28,10 @@ The client object can be used to obtain object handles for M2X devices, streams 
   device = m2x.device("<DEVICE-ID>")
   ```
 
-- [Stream](mrblib/m2x-client-device.rb)
+- [Stream](mrblib/m2x-client-stream.rb)
   ```ruby
-  stream = m2x.stream("<STREAM-NAME>")
+  device = m2x.device("<DEVICE-ID>")
+  stream = device.stream("<STREAM-NAME>")
   ```
 
 - [Distribution](mrblib/m2x-client-distribution.rb)
