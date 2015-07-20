@@ -32,7 +32,7 @@ class M2X::Client::Resource
   end
 
   def inspect
-    "#<#{self.class.name}: #{@attributes.inspect}>"
+    "#<#{self.class.to_s}: #{@attributes.inspect}>"
   end
 
   # The API path of the resource, to be implemented by the subclass.
