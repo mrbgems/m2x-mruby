@@ -1,5 +1,5 @@
 MRuby::Gem::Specification.new('mruby-m2x') do |spec|
-  spec.version = '0.0.1'
+  spec.version = '0.1.0' # Version number must also be changed in m2x-client.rb
   spec.license = 'MIT'
   spec.summary = 'Client library for AT&T\'s M2X API'
   spec.description = 'AT&T\'s M2X is a cloud-based fully managed data storage service for network connected machine-to-machine (M2M) devices. From trucks and turbines to vending machines and freight containers, M2X enables the devices that power your business to connect and share valuable data.'
