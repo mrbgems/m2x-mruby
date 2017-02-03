@@ -47,6 +47,12 @@ class M2X::Client
     Distribution.new(self, res.json) if res.success?
   end
 
+  # Fetch the existing collection that has the given id.
+  def collection(id)
+    res = get("/collections/#{id}")
+    Collection.new(self, res.json) if res.success?
+  end
+
   # Define REST methods for accessing the M2X API directly.
   [:get, :post, :put, :delete, :head, :options, :patch].each do |verb|
     define_method verb do |path, qs=nil, params=nil, headers=nil|

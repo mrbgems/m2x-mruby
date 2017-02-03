@@ -47,4 +47,36 @@ class M2X::Client::Device < M2X::Client::Resource
   def post_updates(params)
     @client.post("#{path}/updates", nil, params, "Content-Type" => "application/json")
   end
+
+  # Read an object's metadata
+  #
+  # https://m2x.att.com/developer/documentation/v2/device#Read-Device-Metadata
+  def read_metadata
+    @client.get(metadata_path)
+  end
+
+  # Read an object's metadata field
+  #
+  # https://m2x.att.com/developer/documentation/v2/device#Read-Device-Metadata-Field
+  def read_metadata_field(field_name)
+    @client.get("#{metadata_path}/#{field_name}")
+  end
+
+  # Update an object's metadata
+  #
+  # https://m2x.att.com/developer/documentation/v2/device#Update-Device-Metadata
+  def update_metadata(params)
+    @client.put(metadata_path, nil, params, "Content-Type" => "application/json")
+  end
+
+  # Update an object's metadata field
+  #
+  # https://m2x.att.com/developer/documentation/v2/device#Update-Device-Metadata-Field
+  def update_metadata_field(field_name, value)
+    @client.put("#{metadata_path}/#{field_name}", nil, { value: value }, "Content-Type" => "application/json")
+  end
+
+  def metadata_path
+    "#{path}/metadata"
+  end
 end

@@ -20,4 +20,36 @@ class M2X::Client::Distribution < M2X::Client::Resource
     res = @client.post("#{path}/devices", nil, { serial: serial }, "Content-Type" => "application/json")
     Device.new(@client, res.json) if res.success?
   end
+
+  # Read an object's metadata
+  #
+  # https://m2x.att.com/developer/documentation/v2/distribution#Read-Distribution-Metadata
+  def read_metadata
+    @client.get(metadata_path)
+  end
+
+  # Read an object's metadata field
+  #
+  # https://m2x.att.com/developer/documentation/v2/distribution#Read-Distribution-Metadata-Field
+  def read_metadata_field(field_name)
+    @client.get("#{metadata_path}/#{field_name}")
+  end
+
+  # Update an object's metadata
+  #
+  # https://m2x.att.com/developer/documentation/v2/distribution#Update-Distribution-Metadata
+  def update_metadata(params)
+    @client.put(metadata_path, nil, params, "Content-Type" => "application/json")
+  end
+
+  # Update an object's metadata field
+  #
+  # https://m2x.att.com/developer/documentation/v2/distribution#Update-Distribution-Metadata-Field
+  def update_metadata_field(field_name, value)
+    @client.put("#{metadata_path}/#{field_name}", nil, { value: value }, "Content-Type" => "application/json")
+  end
+
+  def metadata_path
+    "#{path}/metadata"
+  end
 end

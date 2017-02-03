@@ -465,3 +465,242 @@ assert 'M2X::Client::Stream#post_values' do
   assert_equal res.success?, true
   assert_equal res.json,     JSON.parse(JSON.generate(result))
 end
+
+assert 'M2X::Client::Device#read_metadata' do
+  client = M2X::Client.new(TEST_API_KEY)
+  device = M2X::Client::Device.new(client, "id"=>"a2852df27102179429b3a02641594044")
+
+  result = { owners:'first' }
+  res = MockSocket.mock!(
+    [:get, "/v2/devices/#{device['id']}/metadata"],
+    ['202 OK', json:result]
+  ) {
+    device.read_metadata
+  }
+
+  assert_true res.is_a?(M2X::Client::Response)
+  assert_equal res.status,   202
+  assert_equal res.success?, true
+  assert_equal res.json,  JSON.parse(JSON.generate(result))
+end
+
+assert 'M2X::Client::Device#read_metadata_field' do
+  client = M2X::Client.new(TEST_API_KEY)
+  device = M2X::Client::Device.new(client, "id"=>"a2852df27102179429b3a02641594044")
+
+  field_name = 'owners'
+  result = { value: 'first' }
+
+  res = MockSocket.mock!(
+    [:get, "/v2/devices/#{device['id']}/metadata/#{field_name}"],
+    ['202 OK', json:result]
+  ) {
+    device.read_metadata_field(field_name)
+  }
+
+  assert_true res.is_a?(M2X::Client::Response)
+  assert_equal res.status,   202
+  assert_equal res.success?, true
+  assert_equal res.json,     JSON.parse(JSON.generate(result))
+end
+
+assert 'M2X::Client::Device#update_metadata' do
+  client = M2X::Client.new(TEST_API_KEY)
+  device = M2X::Client::Device.new(client, "id"=>"a2852df27102179429b3a02641594044")
+
+  params = { owners: 'first' }
+  result = { status:'accepted' }
+
+  res = MockSocket.mock!(
+    [:put, "/v2/devices/#{device['id']}/metadata", json:params],
+    ['202 OK', json:result]
+  ) {
+    device.update_metadata(params)
+  }
+
+  assert_true res.is_a?(M2X::Client::Response)
+  assert_equal res.status,   202
+  assert_equal res.success?, true
+  assert_equal res.json,     JSON.parse(JSON.generate(result))
+end
+
+assert 'M2X::Client::Device#update_metadata_field' do
+  client = M2X::Client.new(TEST_API_KEY)
+  device = M2X::Client::Device.new(client, "id"=>"a2852df27102179429b3a02641594044")
+
+  field_name = 'owners'
+  params = { value: 'first' }
+  result = { status:'accepted' }
+
+  res = MockSocket.mock!(
+    [:put, "/v2/devices/#{device['id']}/metadata/#{field_name}", json:params],
+    ['202 OK', json:result]
+  ) {
+    device.update_metadata_field(field_name,params[:value])
+  }
+
+  assert_true res.is_a?(M2X::Client::Response)
+  assert_equal res.status,   202
+  assert_equal res.success?, true
+  assert_equal res.json,     JSON.parse(JSON.generate(result))
+end
+
+assert 'M2X::Client::Distribution#read_metadata' do
+  client = M2X::Client.new(TEST_API_KEY)
+  distributions = M2X::Client::Distribution.new(client, "id"=>"a2852df27102179429b3a02641594044")
+
+  result = { owners:'first' }
+
+  res = MockSocket.mock!(
+    [:get, "/v2/distributions/#{distributions['id']}/metadata"],
+    ['202 OK', json:result]
+  ) {
+    distributions.read_metadata
+  }
+
+  assert_true res.is_a?(M2X::Client::Response)
+  assert_equal res.status,   202
+  assert_equal res.success?, true
+  assert_equal res.json,  JSON.parse(JSON.generate(result))
+end
+
+assert 'M2X::Client::Distribution#read_metadata_field' do
+  client = M2X::Client.new(TEST_API_KEY)
+  distributions = M2X::Client::Distribution.new(client, "id"=>"a2852df27102179429b3a02641594044")
+
+  field_name = 'owners'
+  result = { value: 'first' }
+
+  res = MockSocket.mock!(
+    [:get, "/v2/distributions/#{distributions['id']}/metadata/#{field_name}"],
+    ['202 OK', json:result]
+  ) {
+    distributions.read_metadata_field(field_name)
+  }
+
+  assert_true res.is_a?(M2X::Client::Response)
+  assert_equal res.status,   202
+  assert_equal res.success?, true
+  assert_equal res.json,     JSON.parse(JSON.generate(result))
+end
+
+assert 'M2X::Client::Distribution#update_metadata' do
+  client = M2X::Client.new(TEST_API_KEY)
+  distributions = M2X::Client::Distribution.new(client, "id"=>"a2852df27102179429b3a02641594044")
+
+  params = { owners: 'first' }
+  result = { status:'accepted' }
+
+  res = MockSocket.mock!(
+    [:put, "/v2/distributions/#{distributions['id']}/metadata", json:params],
+    ['202 OK', json:result]
+  ) {
+    distributions.update_metadata(params)
+  }
+
+  assert_true res.is_a?(M2X::Client::Response)
+  assert_equal res.status,   202
+  assert_equal res.success?, true
+  assert_equal res.json,     JSON.parse(JSON.generate(result))
+end
+
+assert 'M2X::Client::Distribution#update_metadata_field' do
+  client = M2X::Client.new(TEST_API_KEY)
+  distributions = M2X::Client::Distribution.new(client, "id"=>"a2852df27102179429b3a02641594044")
+
+  field_name = 'owners'
+  params = { value: 'first' }
+  result = { status:'accepted' }
+
+  res = MockSocket.mock!(
+    [:put, "/v2/distributions/#{distributions['id']}/metadata/#{field_name}", json:params],
+    ['202 OK', json:result]
+  ) {
+    distributions.update_metadata_field(field_name,params[:value])
+  }
+
+  assert_true res.is_a?(M2X::Client::Response)
+  assert_equal res.status,   202
+  assert_equal res.success?, true
+  assert_equal res.json,     JSON.parse(JSON.generate(result))
+end
+
+assert 'M2X::Client::Collection#read_metadata' do
+  client = M2X::Client.new(TEST_API_KEY)
+  collections = M2X::Client::Collection.new(client, "id"=>"a2852df27102179429b3a02641594044")
+
+  result = { owners:'first' }
+
+  res = MockSocket.mock!(
+    [:get, "/v2/collections/#{collections['id']}/metadata"],
+    ['202 OK', json:result]
+  ) {
+    collections.read_metadata
+  }
+
+  assert_true res.is_a?(M2X::Client::Response)
+  assert_equal res.status,   202
+  assert_equal res.success?, true
+  assert_equal res.json,  JSON.parse(JSON.generate(result))
+end
+
+assert 'M2X::Client::Collection#read_metadata_field' do
+  client = M2X::Client.new(TEST_API_KEY)
+  collections = M2X::Client::Collection.new(client, "id"=>"a2852df27102179429b3a02641594044")
+
+  field_name = 'owners'
+  result = { value: 'first' }
+
+  res = MockSocket.mock!(
+    [:get, "/v2/collections/#{collections['id']}/metadata/#{field_name}"],
+    ['202 OK', json:result]
+  ) {
+    collections.read_metadata_field(field_name)
+  }
+
+  assert_true res.is_a?(M2X::Client::Response)
+  assert_equal res.status,   202
+  assert_equal res.success?, true
+  assert_equal res.json,     JSON.parse(JSON.generate(result))
+end
+
+assert 'M2X::Client::Collection#update_metadata' do
+  client = M2X::Client.new(TEST_API_KEY)
+  collections = M2X::Client::Collection.new(client, "id"=>"a2852df27102179429b3a02641594044")
+
+  params = { owners: 'first' }
+  result = { status:'accepted' }
+
+  res = MockSocket.mock!(
+    [:put, "/v2/collections/#{collections['id']}/metadata", json:params],
+    ['202 OK', json:result]
+  ) {
+    collections.update_metadata(params)
+  }
+
+  assert_true res.is_a?(M2X::Client::Response)
+  assert_equal res.status,   202
+  assert_equal res.success?, true
+  assert_equal res.json,     JSON.parse(JSON.generate(result))
+end
+
+assert 'M2X::Client::Collection#update_metadata_field' do
+  client = M2X::Client.new(TEST_API_KEY)
+  collections = M2X::Client::Collection.new(client, "id"=>"a2852df27102179429b3a02641594044")
+
+  field_name = 'owners'
+  params = { value: 'first' }
+  result = { status:'accepted' }
+
+  res = MockSocket.mock!(
+    [:put, "/v2/collections/#{collections['id']}/metadata/#{field_name}", json:params],
+    ['202 OK', json:result]
+  ) {
+    collections.update_metadata_field(field_name,params[:value])
+  }
+
+  assert_true res.is_a?(M2X::Client::Response)
+  assert_equal res.status,   202
+  assert_equal res.success?, true
+  assert_equal res.json,     JSON.parse(JSON.generate(result))
+end
