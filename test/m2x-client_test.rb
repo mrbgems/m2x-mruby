@@ -704,3 +704,178 @@ assert 'M2X::Client::Collection#update_metadata_field' do
   assert_equal res.success?, true
   assert_equal res.json,     JSON.parse(JSON.generate(result))
 end
+
+assert 'M2X::Client::Commands#list_commands' do
+  client = M2X::Client.new(TEST_API_KEY)
+  commands = M2X::Client::Commands.new(client, "limit"=>"100", "page"=>"1")
+
+  params = {
+      limit: "1",
+      page: "1"
+  }
+
+  result = { commands: [
+           {id: "201702a7ac40afee3e1c961c8cba93b215b97d", name: "CHECK_UPDATES", status: "processed"},
+           {id: "201702370d5aec7c6a405bdeb52c737d692094", name: "start",status: "processed"} ]
+          }
+
+  res = MockSocket.mock!(
+    [:get, "/v2/commands", json:params],
+    ['200 OK', json:result]
+  ) {
+    commands.list_commands(params)
+  }
+
+  assert_true res.is_a?(M2X::Client::Response)
+  assert_equal res.status,   200
+  assert_equal res.success?, true
+  assert_equal res.json,     JSON.parse(JSON.generate(result))
+end
+
+assert 'M2X::Client::Commands#send_command' do
+  client = M2X::Client.new(TEST_API_KEY)
+  commands = M2X::Client::Commands.new(client, "limit"=>"100", "page"=>"1")
+
+  params = {
+    name: "CHECK_UPDATES",
+    targets: {
+        devices: ["bec0cce620492d0e34e623e1f4dd51e2"]
+    }
+  }
+  result = { status:'accepted' }
+
+  res = MockSocket.mock!(
+    [:post, "/v2/commands", json:params],
+    ['202 Accepted', json:result]
+  ) {
+    commands.send_command(params)
+  }
+
+  assert_true res.is_a?(M2X::Client::Response)
+  assert_equal res.status,   202
+  assert_equal res.success?, true
+  assert_equal res.json,     JSON.parse(JSON.generate(result))
+end
+
+assert 'M2X::Client::Commands#view_command' do
+  client = M2X::Client.new(TEST_API_KEY)
+  commands = M2X::Client::Commands.new(client, "limit"=>"100", "page"=>"1")
+
+  command_id = '201702a7ac40afee3e1c961c8cba93b215b97d'
+
+  result = {
+          id: "201702a7ac40afee3e1c961c8cba93b215b97d",
+          name: "CHECK_UPDATES",
+          status: "processed"
+          }
+
+  res = MockSocket.mock!(
+    [:get, "/v2/commands/#{command_id}"],
+    ['200 OK', json:result]
+  ) {
+    commands.view_command(command_id)
+  }
+
+  assert_true res.is_a?(M2X::Client::Response)
+  assert_equal res.status,   200
+  assert_equal res.success?, true
+  assert_equal res.json,     JSON.parse(JSON.generate(result))
+end
+
+assert 'M2X::Client::Commands#receivedCommandsListByDevice' do
+  client = M2X::Client.new(TEST_API_KEY)
+  commands = M2X::Client::Commands.new(client, "limit"=>"100", "page"=>"1")
+
+  deviceId = "a2852df27102179429b3a02641594044"
+  params = {
+      limit: "1",
+      page: "1"
+  }
+
+  result = { commands: [
+           {id: "201702a7ac40afee3e1c961c8cba93b215b97d", name: "CHECK_UPDATES", status: "processed"},
+           {id: "201702370d5aec7c6a405bdeb52c737d692094", name: "start", status: "processed"} ]
+          }
+
+  res = MockSocket.mock!(
+    [:get, "/v2/devices/#{deviceId}/commands", json:params],
+    ['200 OK', json:result]
+  ) {
+    commands.receivedCommandsListByDevice(deviceId, params)
+  }
+
+  assert_true res.is_a?(M2X::Client::Response)
+  assert_equal res.status,   200
+  assert_equal res.success?, true
+  assert_equal res.json,     JSON.parse(JSON.generate(result))
+end
+
+assert 'M2X::Client::Commands#viewDeviceCommandDetails' do
+  client = M2X::Client.new(TEST_API_KEY)
+  commands = M2X::Client::Commands.new(client, "limit"=>"100", "page"=>"1")
+
+  deviceId = "a2852df27102179429b3a02641594044"
+  commandId = "201702a7ac40afee3e1c961c8cba93b215b97d"
+
+  result = {
+          id: "201702a7ac40afee3e1c961c8cba93b215b97d",
+          name: "CHECK_UPDATES",
+          status: "processed"
+          }
+
+  res = MockSocket.mock!(
+    [:get, "/v2/devices/#{deviceId}/commands/#{commandId}"],
+    ['200 OK', json:result]
+  ) {
+    commands.viewDeviceCommandDetails(deviceId, commandId)
+  }
+
+  assert_true res.is_a?(M2X::Client::Response)
+  assert_equal res.status,   200
+  assert_equal res.success?, true
+  assert_equal res.json,     JSON.parse(JSON.generate(result))
+end
+
+assert 'M2X::Client::Commands#updateCommandStatusAsProcessed' do
+  client = M2X::Client.new(TEST_API_KEY)
+  commands = M2X::Client::Commands.new(client, "limit"=>"100", "page"=>"1")
+
+  deviceId = "a2852df27102179429b3a02641594044"
+  commandId = "201702a7ac40afee3e1c961c8cba93b215b97d"
+
+  result = { status:'accepted' }
+
+  res = MockSocket.mock!(
+    [:post, "/v2/devices/#{deviceId}/commands/#{commandId}/process"],
+    ['204 No Content', json:result]
+  ) {
+    commands.updateCommandStatusAsProcessed(deviceId, commandId)
+  }
+
+  assert_true res.is_a?(M2X::Client::Response)
+  assert_equal res.status,   204
+  assert_equal res.success?, true
+  assert_equal res.json,     JSON.parse(JSON.generate(result))
+end
+
+assert 'M2X::Client::Commands#updateCommandStatusAsRejected' do
+  client = M2X::Client.new(TEST_API_KEY)
+  commands = M2X::Client::Commands.new(client, "limit"=>"100", "page"=>"1")
+
+  deviceId = "a2852df27102179429b3a02641594044"
+  commandId = "201702a7ac40afee3e1c961c8cba93b215b97d"
+
+  result = { status:'accepted' }
+
+  res = MockSocket.mock!(
+    [:post, "/v2/devices/#{deviceId}/commands/#{commandId}/reject"],
+    ['204 No Content', json:result]
+  ) {
+    commands.updateCommandStatusAsRejected(deviceId, commandId)
+  }
+
+  assert_true res.is_a?(M2X::Client::Response)
+  assert_equal res.status,   204
+  assert_equal res.success?, true
+  assert_equal res.json,     JSON.parse(JSON.generate(result))
+end
