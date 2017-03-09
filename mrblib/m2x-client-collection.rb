@@ -2,43 +2,46 @@ module M2X; end
 class M2X::Client; end
 class M2X::Client::Resource; end
 
-# Wrapper for the AT&T M2X Devices API.
-#
-# https://m2x.att.com/developer/documentation/v2/collections
+# Wrapper for {https://m2x.att.com/developer/documentation/v2/collections M2X Collections} API
 class M2X::Client::Collection < M2X::Client::Resource
   # The API path of the collection.
   def path
     @path ||= "/collections/#{HTTP::URL.encode(@attributes["id"])}"
   end
 
-  # Read an object's metadata
+  # Method for {https://m2x.att.com/developer/documentation/v2/collections#Read-Collection-Metadata Read Collection Metadata} endpoint.
   #
-  # https://m2x.att.com/developer/documentation/v2/collections#Read-Collection-Metadata
+  # @return {Response} The API response, see M2X API docs for details
   def read_metadata
     @client.get(metadata_path)
   end
 
-  # Read an object's metadata field
+  # Method for {https://m2x.att.com/developer/documentation/v2/collections#Read-Collection-Metadata-Field Read Collection Metadata Field} endpoint.
   #
-  # https://m2x.att.com/developer/documentation/v2/collections#Read-Collection-Metadata-Field
+  # @param (String) field_name The metadata field to be read
+  # @return {Response} The API response, see M2X API docs for details
   def read_metadata_field(field_name)
     @client.get("#{metadata_path}/#{field_name}")
   end
 
-  # Update an object's metadata
+  # Method for {https://m2x.att.com/developer/documentation/v2/collections#Update-Collection-Metadata Update Collection Metadata} endpoint.
   #
-  # https://m2x.att.com/developer/documentation/v2/collections#Update-Collection-Metadata
+  # @param params Query parameters passed as keyword arguments. View M2X API Docs for listing of available parameters.
+  # @return {Response} The API response, see M2X API docs for details
   def update_metadata(params)
     @client.put(metadata_path, nil, params, "Content-Type" => "application/json")
   end
 
-  # Update an object's metadata field
+  # Method for {https://m2x.att.com/developer/documentation/v2/collections#Update-Collection-Metadata Update Collection Metadata} endpoint.
   #
-  # https://m2x.att.com/developer/documentation/v2/collections#Update-Collection-Metadata-Field
+  # @param (String) field_name The field to be updated.
+  # @param (String) value The new value.
+  # @return {Response} The API response, see M2X API docs for details
   def update_metadata_field(field_name, value)
     @client.put("#{metadata_path}/#{field_name}", nil, { value: value }, "Content-Type" => "application/json")
   end
 
+  # The API path of the collection's metadata.
   def metadata_path
     "#{path}/metadata"
   end

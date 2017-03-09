@@ -1,5 +1,3 @@
-module M2X; end
-
 # Interface for connecting with the AT&T M2X API.
 #
 # Create a Client and use it to create or access Resource objects or
@@ -8,6 +6,8 @@ module M2X; end
 #     m2x = M2X::Client.new("<YOUR-API-KEY>")
 #     m2x.get("/some_path")
 #
+module M2X; end
+
 class M2X::Client
   VERSION = "0.1.1"
 
@@ -27,27 +27,37 @@ class M2X::Client
     @api_version = api_version || DEFAULT_API_VERSION
   end
 
-  # Creates a new device on M2X with the specified parameters.
+  # Method for {https://m2x.att.com/developer/documentation/v2/device#Create-Device Create Device} endpoint.
   #
-  # https://m2x.att.com/developer/documentation/v2/device#Create-Device
+  # @param params Query parameters passed as keyword arguments. View M2X API Docs for listing of available parameters.
+  # @return {Device} newly created device.
   def create_device(params)
     res = post("/devices", nil, params, "Content-Type" => "application/json")
     Device.new(self, res.json) if res.success?
   end
 
-  # Fetch the existing device that has the given id.
+  # Method for {https://m2x.att.com/developer/documentation/v2/device#View-Device-Details View Device Details} endpoint.
+  #
+  # @param (String) id Device ID to view.
+  # @return {Device} The Device object retrieved.
   def device(id)
     res = get("/devices/#{id}")
     Device.new(self, res.json) if res.success?
   end
 
-  # Fetch the existing distribution that has the given id.
+  # Method for {https://m2x.att.com/developer/documentation/v2/distribution#View-Distribution-Details View Distribution Details} endpoint.
+  #
+  # @param (String) id Distribution ID to view.
+  # @return {Distribution} The Distribution object retrieved.
   def distribution(id)
     res = get("/distributions/#{id}")
     Distribution.new(self, res.json) if res.success?
   end
 
-  # Fetch the existing collection that has the given id.
+  # Method for {https://m2x.att.com/developer/documentation/v2/collections#View-Collection-Details View Collection Details} endpoint.
+  #
+  # @param (String) id Collection ID to view.
+  # @return {Collection} The Collection object retrieved.
   def collection(id)
     res = get("/collections/#{id}")
     Collection.new(self, res.json) if res.success?
